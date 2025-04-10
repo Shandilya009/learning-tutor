@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Call - AI Tutoring Tool</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <style>
+    .video-container {
+      height: calc(100vh - 8rem);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .setup-screen, .call-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .call-screen {
+      display: none;
+    }
+    
+    .setup-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .video-preview {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16 / 9;
+      background-color: #1f2937;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 2rem;
+    }
+    
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+    
+    .video-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .video-control-btn {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #374151;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .video-control-btn:hover {
+      background-color: #4b5563;
+    }
+    
+    .video-control-btn.active {
+      background-color: #7c3aed;
+    }
+    
+    .video-control-btn.disabled {
+      background-color: #ef4444;
+    }
+    
+    .setup-options {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .call-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background-color: #1f2937;
+      color: white;
+    }
+    
+    .call-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .call-badge {
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+    
+    .call-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .call-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #111827;
+      overflow-y: auto;
+    }
+    
+    .participant {
+      aspect-ratio: 16 / 9;
+      background-color: #1f2937;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .participant-info {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: white;
+    }
+    
+    .participant-avatar {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 9999px;
+      background-color: #7c3aed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.75rem;
+    }
+    
+    .participant-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+    
+    .participant-placeholder .avatar {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 9999px;
+      background-color: #7c3aed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+    
+    .call-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #1f2937;
+      gap: 1rem;
+    }
+    
+    .call-btn {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .call-btn.primary {
+      background-color: #7c3aed;
+    }
+    
+    .call-btn.primary:hover {
+      background-color: #6d28d9;
+    }
+    
+    .call-btn.secondary {
+      background-color: #4b5563;
+    }
+    
+    .call-btn.secondary:hover {
+      background-color: #374151;
+    }
+    
+    .call-btn.danger {
+      background-color: #ef4444;
+    }
+    
+    .call-btn.danger:hover {
+      background-color: #dc2626;
+    }
+    
+    .select-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 1rem;
+    }
+    
+    .select-label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .select-input {
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      color: #1f2937;
+    }
+    
+    .dark .select-input {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+    
+    .select-input:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    }
+    
+    .room-code-input {
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      color: #1f2937;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 1rem;
+    }
+    
+    .dark .room-code-input {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+    
+    .room-code-input:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    }
+    
+    .name-input {
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      color: #1f2937;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 1rem;
+    }
+    
+    .dark .name-input {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+    
+    .name-input:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    }
+    
+    .session-ended {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .session-ended-icon {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 9999px;
+      background-color: rgba(239, 68, 68, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ef4444;
+      margin-bottom: 1.5rem;
+    }
+    
+    .session-ended-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .session-ended-subtitle {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dark .session-ended-subtitle {
+      color: #9ca3af;
+    }
+    
+    .session-duration {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .session-thank-you {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dark .session-thank-you {
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">AI Tutoring Tool</div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <a href="  class="nav-link">Home</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="chat.html" class="nav-link">Chat</a>
+        <a href="video.html" class="nav-link">Video</a>
+      </nav>
+    </header>
+
+    <!-- Video Container -->
+    <div class="card video-container">
+      <!-- Setup Screen -->
+      <div id="setup-screen" class="setup-screen">
+        <div class="setup-content">
+          <h1 class="text-2xl font-bold mb-4">Join Video Session</h1>
+          <p class="text-gray-500 mb-6">Set up your audio and video before joining</p>
+          
+          <input type="text" id="user-name" class="name-input" placeholder="Enter your name" required>
+          
+          <div class="video-preview">
+            <video id="local-video-preview" autoplay muted playsinline></video>
+            <div class="video-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 mb-2 opacity-50">
+                <path d="m22 8-6 4 6 4V8Z"></path>
+                <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+              </svg>
+              <p>Camera preview</p>
+            </div>
+            
+            <div class="video-controls">
+              <button id="mic-toggle" class="video-control-btn active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" x2="12" y1="19" y2="22"></line>
+                </svg>
+              </button>
+              <button id="camera-toggle" class="video-control-btn active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path d="m22 8-6 4 6 4V8Z"></path>
+                  <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="select-container">
+            <label for="camera-select" class="select-label">Camera</label>
+            <select id="camera-select" class="select-input">
+              <option value="">Select camera</option>
+            </select>
+          </div>
+          
+          <div class="select-container">
+            <label for="mic-select" class="select-label">Microphone</label>
+            <select id="mic-select" class="select-input">
+              <option value="">Select microphone</option>
+            </select>
+          </div>
+          
+          <div class="setup-options">
+            <div>
+              <input type="text" id="room-code" class="room-code-input" placeholder="Enter room code (optional)">
+              <button id="join-call-btn" class="btn btn-primary">Join Session</button>
+            </div>
+            <div>
+              <button id="create-call-btn" class="btn btn-primary">Create Session</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Call Screen -->
+      <div id="call-screen" class="call-screen">
+        <div class="call-header">
+          <div class="call-info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-purple-400 mr-2">
+              <path d="m22 8-6 4 6 4V8Z"></path>
+              <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+            </svg>
+            <span class="font-medium">AI Tutoring Session</span>
+            <div class="call-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3 mr-1">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span id="call-duration">00:00</span>
+            </div>
+            <div class="call-badge">
+              <span>Room: </span>
+              <span id="room-code-display">ABC123</span>
+            </div>
+          </div>
+          <div class="call-actions">
+            <button class="call-btn secondary" title="Copy room code">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="call-grid">
+          <!-- Local participant -->
+          <div class="participant">
+            <video id="local-video" autoplay muted playsinline></video>
+            <div class="participant-info">
+              <div class="participant-avatar">Y</div>
+              <span>You</span>
+            </div>
+          </div>
+          
+          <!-- Remote participant (placeholder) -->
+          <div class="participant">
+            <div class="participant-placeholder">
+              <div class="avatar">T</div>
+              <div class="font-medium">Dr. Smith</div>
+              <div class="text-xs">Tutor</div>
+            </div>
+            <div class="participant-info">
+              <div class="participant-avatar">T</div>
+              <span>Dr. Smith</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="call-footer">
+          <button id="mic-btn" class="call-btn primary" title="Toggle microphone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" x2="12" y1="19" y2="22"></line>
+            </svg>
+          </button>
+          <button id="camera-btn" class="call-btn primary" title="Toggle camera">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="m22 8-6 4 6 4V8Z"></path>
+              <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+            </svg>
+          </button>
+          <button id="screen-share-btn" class="call-btn primary" title="Share screen">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+              <line x1="8" x2="16" y1="21" y2="21"></line>
+              <line x1="12" x2="12" y1="17" y2="21"></line>
+            </svg>
+          </button>
+          <button id="hand-raise-btn" class="call-btn secondary" title="Raise hand">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
+              <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+              <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
+            </svg>
+          </button>
+          <button id="chat-btn" class="call-btn secondary" title="Chat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button id="end-call-btn" class="call-btn danger" title="End call">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M16 2v4"></path>
+              <path d="M8 2v4"></path>
+              <path d="M15.5 13.5 8 6"></path>
+              <path d="M16 22h4a2 2 0 0 0 2-2v-4"></path>
+              <path d="M2 16v4a2 2 0 0 0 2 2h4"></path>
+              <path d="M22 8V6a2 2 0 0 0-2-2h-4"></path>
+              <path d="M2 8V6a2 2 0 0 1 2-2h4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Session Ended Screen -->
+      <div id="session-ended" class="session-ended">
+        <div class="session-ended-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12">
+            <path d="M16 2v4"></path>
+            <path d="M8 2v4"></path>
+            <path d="M15.5 13.5 8 6"></path>
+            <path d="M16 22h4a2 2 0 0 0 2-2v-4"></path>
+            <path d="M2 16v4a2 2 0 0 0 2 2h4"></path>
+            <path d="M22 8V6a2 2 0 0 0-2-2h-4"></path>
+            <path d="M2 8V6a2 2 0 0 1 2-2h4"></path>
+          </svg>
+        </div>
+        <h2 class="session-ended-title">Session Ended</h2>
+        <p class="session-ended-subtitle">Your video session has ended</p>
+        <p class="session-duration">Session duration: <span id="final-duration">00:15:30</span></p>
+        <p class="session-thank-you">Thank you for using AI Tutoring Tool</p>
+        <button id="new-session-btn" class="btn btn-primary">Start New Session</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-4 border-t text-center">
+      <p class="text-gray-500">
+        &copy; <span id="current-year"></span> AI Tutoring Tool. All rights reserved.
+        <script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Theme Toggle Button (Fixed) -->
+  <button id="theme-toggle-btn" onclick="toggleTheme()" class="fixed bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden dark:block">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2"></path>
+      <path d="M12 21v2"></path>
+      <path d="M4.22 4.22l1.42 1.42"></path>
+      <path d="M18.36 18.36l1.42 1.42"></path>
+      <path d="M1 12h2"></path>
+      <path d="M21 12h2"></path>
+      <path d="M4.22 19.78l1.42-1.42"></path>
+      <path d="M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="block dark:hidden">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </svg>
+  </button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const setupScreen = document.getElementById('setup-screen');
+      const callScreen = document.getElementById('call-screen');
+      const sessionEnded = document.getElementById('session-ended');
+      const joinCallBtn = document.getElementById('join-call-btn');
+      const createCallBtn = document.getElementById('create-call-btn');
+      const endCallBtn = document.getElementById('end-call-btn');
+      const newSessionBtn = document.getElementById('new-session-btn');
+      const micToggle = document.getElementById('mic-toggle');
+      const cameraToggle = document.getElementById('camera-toggle');
+      const micBtn = document.getElementById('mic-btn');
+      const cameraBtn = document.getElementById('camera-btn');
+      const screenShareBtn = document.getElementById('screen-share-btn');
+      const handRaiseBtn = document.getElementById('hand-raise-btn');
+      const chatBtn = document.getElementById('chat-btn');
+      const localVideoPreview = document.getElementById('local-video-preview');
+      const localVideo = document.getElementById('local-video');
+      const roomCodeInput = document.getElementById('room-code');
+      const roomCodeDisplay = document.getElementById('room-code-display');
+      const callDuration = document.getElementById('call-duration');
+      const finalDuration = document.getElementById('final-duration');
+      const cameraSelect = document.getElementById('camera-select');
+      const micSelect = document.getElementById('mic-select');
+      
+      // State
+      let stream = null;
+      let durationInterval = null;
+      let startTime = null;
+      let isMicEnabled = true;
+      let isCameraEnabled = true;
+      let isScreenSharing = false;
+      let isHandRaised = false;
+      let isChatOpen = false;
+      
+      // Initialize media devices
+      async function initializeDevices() {
+        try {
+          // Get list of media devices
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          
+          // Filter cameras and microphones
+          const cameras = devices.filter(device => device.kind === 'videoinput');
+          const mics = devices.filter(device => device.kind === 'audioinput');
+          
+          // Populate camera select
+          cameraSelect.innerHTML = '<option value="">Select camera</option>';
+          cameras.forEach(camera => {
+            const option = document.createElement('option');
+            option.value = camera.deviceId;
+            option.text = camera.label || `Camera ${camera.deviceId.substring(0, 5)}...`;
+            cameraSelect.appendChild(option);
+          });
+          
+          // Populate mic select
+          micSelect.innerHTML = '<option value="">Select microphone</option>';
+          mics.forEach(mic => {
+            const option = document.createElement('option');
+            option.value = mic.deviceId;
+            option.text = mic.label || `Microphone ${mic.deviceId.substring(0, 5)}...`;
+            micSelect.appendChild(option);
+          });
+          
+          // Start camera preview
+          await startCameraPreview();
+        } catch (err) {
+          console.error('Error getting media devices:', err);
+        }
+      }
+      
+      // Start camera preview
+      async function startCameraPreview() {
+        try {
+          // Request camera and microphone access
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+          });
+          
+          // Update video element
+          localVideoPreview.srcObject = stream;
+          
+          // Update select values if labels are available
+          const videoTrack = stream.getVideoTracks()[0];
+          const audioTrack = stream.getAudioTracks()[0];
+          
+          if (videoTrack && videoTrack.label) {
+            Array.from(cameraSelect.options).forEach(option => {
+              if (option.text === videoTrack.label) {
+                cameraSelect.value = option.value;
+              }
+            });
+          }
+          
+          if (audioTrack && audioTrack.label) {
+            Array.from(micSelect.options).forEach(option => {
+              if (option.text === audioTrack.label) {
+                micSelect.value = option.value;
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Error starting camera:', err);
+        }
+      }
+      
+      // Generate random room code
+      function generateRoomCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+          result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+      }
+      
+      // Start call
+      function startCall() {
+        // Generate room code if not provided
+        if (!roomCodeInput.value) {
+          roomCodeInput.value = generateRoomCode();
+        }
+        
+        // Display room code
+        roomCodeDisplay.textContent = roomCodeInput.value;
+        
+        // Hide setup screen, show call screen
+        setupScreen.style.display = 'none';
+        callScreen.style.display = 'flex';
+        sessionEnded.style.display = 'none';
+        
+        // Set local video
+        localVideo.srcObject = stream;
+        
+        // Start duration timer
+        startTime = new Date();
+        durationInterval = setInterval(updateDuration, 1000);
+      }
+      
+      // End call
+      function endCall() {
+        // Stop duration timer
+        clearInterval(durationInterval);
+        
+        // Set final duration
+        finalDuration.textContent = callDuration.textContent;
+        
+        // Hide call screen, show session ended
+        callScreen.style.display = 'none';
+        sessionEnded.style.display = 'flex';
+        
+        // Stop all tracks
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+      }
+      
+      // Update call duration
+      function updateDuration() {
+        const now = new Date();
+        const diff = now - startTime;
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        callDuration.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+      
+      // Toggle microphone
+      function toggleMicrophone() {
+        if (stream) {
+          const audioTracks = stream.getAudioTracks();
+          if (audioTracks.length > 0) {
+            isMicEnabled = !isMicEnabled;
+            audioTracks[0].enabled = isMicEnabled;
+            
+            // Update UI
+            if (isMicEnabled) {
+              micToggle.classList.add('active');
+              micToggle.classList.remove('disabled');
+              micBtn.classList.add('primary');
+              micBtn.classList.remove('danger');
+            } else {
+              micToggle.classList.remove('active');
+              micToggle.classList.add('disabled');
+              micBtn.classList.remove('primary');
+              micBtn.classList.add('danger');
+            }
+          }
+        }
+      }
+      
+      // Toggle camera
+      function toggleCamera() {
+        if (stream) {
+          const videoTracks = stream.getVideoTracks();
+          if (videoTracks.length > 0) {
+            isCameraEnabled = !isCameraEnabled;
+            videoTracks[0].enabled = isCameraEnabled;
+            
+            // Update UI
+            if (isCameraEnabled) {
+              cameraToggle.classList.add('active');
+              cameraToggle.classList.remove('disabled');
+              cameraBtn.classList.add('primary');
+              cameraBtn.classList.remove('danger');
+            } else {
+              cameraToggle.classList.remove('active');
+              cameraToggle.classList.add('disabled');
+              cameraBtn.classList.remove('primary');
+              cameraBtn.classList.add('danger');
+            }
+          }
+        }
+      }
+      
+      // Event Listeners
+      joinCallBtn.addEventListener('click', startCall);
+      createCallBtn.addEventListener('click', startCall);
+      endCallBtn.addEventListener('click', endCall);
+      newSessionBtn.addEventListener('click', function() {
+        sessionEnded.style.display = 'none';
+        setupScreen.style.display = 'flex';
+        initializeDevices();
+      });
+      
+      micToggle.addEventListener('click', toggleMicrophone);
+      cameraToggle.addEventListener('click', toggleCamera);
+      micBtn.addEventListener('click', toggleMicrophone);
+      cameraBtn.addEventListener('click', toggleCamera);
+      
+      screenShareBtn.addEventListener('click', function() {
+        isScreenSharing = !isScreenSharing;
+        if (isScreenSharing) {
+          screenShareBtn.classList.remove('primary');
+          screenShareBtn.classList.add('danger');
+        } else {
+          screenShareBtn.classList.add('primary');
+          screenShareBtn.classList.remove('danger');
+        }
+      });
+      
+      handRaiseBtn.addEventListener('click', function() {
+        isHandRaised = !isHandRaised;
+        if (isHandRaised) {
+          handRaiseBtn.classList.remove('secondary');
+          handRaiseBtn.classList.add('primary');
+        } else {
+          handRaiseBtn.classList.add('secondary');
+          handRaiseBtn.classList.remove('primary');
+        }
+      });
+      
+      chatBtn.addEventListener('click', function() {
+        isChatOpen = !isChatOpen;
+        if (isChatOpen) {
+          chatBtn.classList.remove('secondary');
+          chatBtn.classList.add('primary');
+        } else {
+          chatBtn.classList.add('secondary');
+          chatBtn.classList.remove('primary');
+        }
+      });
+      
+      // Initialize
+      initializeDevices();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - AI Tutoring Tool</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <style>
+    .login-container {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+    
+    .tab {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab.active {
+      border-bottom-color: #7c3aed;
+      color: #7c3aed;
+      font-weight: 500;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .account-type {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    
+    .account-type-option {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+    }
+    
+    .account-type-option:first-child {
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    
+    .account-type-option:last-child {
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    
+    .account-type-option.active {
+      background-color: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+    }
+    
+    .dark .account-type-option {
+      border-color: #4b5563;
+    }
+    
+    .dark .account-type-option.active {
+      background-color: #6d28d9;
+      border-color: #6d28d9;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .checkbox-container input {
+      margin-right: 0.5rem;
+    }
+    
+    .social-login {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      color: #4b5563;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .dark .social-btn {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: #e5e7eb;
+    }
+    
+    .social-btn:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .dark .social-btn:hover {
+      background-color: #4b5563;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .dark .divider::before,
+    .dark .divider::after {
+      border-top-color: #4b5563;
+    }
+    
+    .divider-text {
+      padding: 0 0.5rem;
+      color: #6b7280;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+    
+    .dark .divider-text {
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">AI Tutoring Tool</div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="chat.html" class="nav-link">Chat</a>
+        <a href="video.html" class="nav-link">Video</a>
+      </nav>
+    </header>
+
+    <!-- Login Container -->
+    <div class="login-container">
+      <div class="card" style="width: 100%; max-width: 28rem;">
+        <div class="card-header text-center">
+          <h1 class="card-title">Welcome back</h1>
+          <p class="text-gray-500">Choose your account type and sign in to continue</p>
+          
+          <!-- Account Type Selector -->
+          <div class="account-type mt-4">
+            <div class="account-type-option active" data-type="student">Student</div>
+            <div class="account-type-option" data-type="parent">Parent</div>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <!-- Tabs -->
+          <div class="tabs">
+            <div class="tab active" data-tab="login">Login</div>
+            <div class="tab" data-tab="register">Register</div>
+          </div>
+          
+          <!-- Login Form -->
+          <div class="tab-content active" id="login-tab">
+            <form id="login-form" onsubmit="simulateLogin(event)">
+              <div class="form-group">
+                <label for="email" class="form-label">Email or Username</label>
+                <input type="text" id="email" class="form-input" placeholder="Enter your email or username" required>
+              </div>
+              
+              <div class="form-group">
+                <div class="flex justify-between mb-1">
+                  <label for="password" class="form-label">Password</label>
+                  <a href="#" class="text-purple-600 text-sm">Forgot password?</a>
+                </div>
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+              </div>
+              
+              <div class="checkbox-container">
+                <input type="checkbox" id="remember">
+                <label for="remember">Remember me</label>
+              </div>
+              
+              <button type="submit" class="btn btn-primary w-full">Sign In</button>
+            </form>
+          </div>
+          
+          <!-- Register Form -->
+          <div class="tab-content" id="register-tab">
+            <form id="register-form" onsubmit="simulateRegister(event)">
+              <div class="form-group">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" class="form-input" placeholder="Enter your full name" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="reg-email" class="form-label">Email</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="Enter your email" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="reg-password" class="form-label">Password</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="Create a password" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="confirm-password" class="form-label">Confirm Password</label>
+                <input type="password" id="confirm-password" class="form-input" placeholder="Confirm your password" required>
+              </div>
+              
+              <div class="checkbox-container">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">
+                  I agree to the <a href="#" class="text-purple-600">terms and conditions</a>
+                </label>
+              </div>
+              
+              <button type="submit" class="btn btn-primary w-full">Create Account</button>
+            </form>
+          </div>
+          
+          <!-- Social Login -->
+          <div class="divider">
+            <span class="divider-text">Or continue with</span>
+          </div>
+          
+          <div class="social-login">
+            <button class="social-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="mr-2 h-4 w-4">
+                <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115Z"/>
+                <path fill="#34A853" d="M16.04 18.013c-1.09.703-2.474 1.078-4.04 1.078a7.077 7.077 0 0 1-6.723-4.823l-4.04 3.067A11.965 11.965 0 0 0 12 24c2.933 0 5.735-1.043 7.834-3l-3.793-2.987Z"/>
+                <path fill="#4A90E2" d="M19.834 21c2.195-2.048 3.62-5.096 3.62-9 0-.71-.109-1.473-.272-2.182H12v4.637h6.436c-.317 1.559-1.17 2.766-2.395 3.558L19.834 21Z"/>
+                <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 0 1 4.909 12c0-.782.125-1.533.357-2.235L1.24 6.65A11.934 11.934 0 0 0 0 12c0 1.92.445 3.73 1.237 5.335l4.04-3.067Z"/>
+              </svg>
+              <span>Google</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-4 border-t text-center">
+      <p class="text-gray-500">
+        &copy; <span id="current-year"></span> AI Tutoring Tool. All rights reserved.
+        <script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Theme Toggle Button (Fixed) -->
+  <button id="theme-toggle-btn" onclick="toggleTheme()" class="fixed bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden dark:block">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2"></path>
+      <path d="M12 21v2"></path>
+      <path d="M4.22 4.22l1.42 1.42"></path>
+      <path d="M18.36 18.36l1.42 1.42"></path>
+      <path d="M1 12h2"></path>
+      <path d="M21 12h2"></path>
+      <path d="M4.22 19.78l1.42-1.42"></path>
+      <path d="M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="block dark:hidden">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </svg>
+  </button>
+
+  <script>
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.getAttribute('data-tab');
+        
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show corresponding content
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `${tabId}-tab`) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+    
+    // Account type switching
+    const accountTypes = document.querySelectorAll('.account-type-option');
+    
+    accountTypes.forEach(type => {
+      type.addEventListener('click', () => {
+        accountTypes.forEach(t => t.classList.remove('active'));
+        type.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

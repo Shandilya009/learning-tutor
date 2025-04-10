@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - AI Tutoring Tool</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <style>
+    .chat-container {
+      height: calc(100vh - 8rem);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .dark .chat-header {
+      border-bottom-color: #374151;
+    }
+
+    .chat-title {
+      display: flex;
+      align-items: center;
+    }
+
+    .chat-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      background-color: #ede9fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.5rem;
+      font-weight: bold;
+      color: #7c3aed;
+    }
+
+    .dark .chat-avatar {
+      background-color: #5b21b6;
+      color: #ede9fe;
+    }
+
+    .chat-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-action-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .dark .chat-action-btn {
+      color: #9ca3af;
+    }
+
+    .chat-action-btn:hover {
+      background-color: #f3f4f6;
+      color: #7c3aed;
+    }
+
+    .dark .chat-action-btn:hover {
+      background-color: #374151;
+      color: #a78bfa;
+    }
+
+    .chat-action-btn.active {
+      background-color: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .dark .chat-action-btn.active {
+      background-color: #5b21b6;
+      color: #ede9fe;
+    }
+
+    .chat-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .user-message,
+    .bot-message {
+      margin-bottom: 1rem;
+    }
+
+    .user-message {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .bot-message {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .message-bubble.user {
+      background-color: #7c3aed;
+      color: white;
+    }
+
+    .message-bubble.bot {
+      background-color: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .dark .message-bubble.bot {
+      background-color: #374151;
+      color: #f9fafb;
+    }
+
+    .bot-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .bot-icon {
+      margin-right: 0.25rem;
+    }
+
+    .bot-name {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .dark .bot-name {
+      color: #9ca3af;
+    }
+
+    .bot-content {
+      line-height: 1.5;
+    }
+
+    .response-list {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #7c3aed;
+      border-radius: 50%;
+    }
+
+    .chat-input {
+      border-top: 1px solid #e5e7eb;
+      padding: 1rem;
+    }
+
+    .dark .chat-input {
+      border-top-color: #374151;
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-textarea {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      resize: none;
+      min-height: 2.5rem;
+      max-height: 10rem;
+    }
+
+    .dark .chat-textarea {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+
+    .chat-textarea:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    }
+
+    .chat-send-btn {
+      padding: 0.75rem;
+      background-color: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .chat-send-btn:hover {
+      background-color: #6d28d9;
+    }
+
+    .chat-send-btn:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .resources-panel {
+      border-top: 1px solid #e5e7eb;
+      padding: 1rem;
+      background-color: #f9fafb;
+      display: none;
+    }
+
+    .dark .resources-panel {
+      border-top-color: #374151;
+      background-color: #1f2937;
+    }
+
+    .resources-panel.active {
+      display: block;
+    }
+
+    .ai-recommendations {
+      background-color: #f3f4fe;
+      border: 1px solid #e0e7ff;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .dark .ai-recommendations {
+      background-color: #312e81;
+      border-color: #4338ca;
+    }
+
+    .recommendation-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      color: #4338ca;
+    }
+
+    .dark .recommendation-title {
+      color: #a5b4fc;
+    }
+
+    .recommendation-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: white;
+      border: 1px solid #e0e7ff;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      transition: background-color 0.2s;
+    }
+
+    .dark .recommendation-item {
+      background-color: #1f2937;
+      border-color: #4338ca;
+    }
+
+    .recommendation-item:hover {
+      background-color: #f5f3ff;
+    }
+
+    .dark .recommendation-item:hover {
+      background-color: #312e81;
+    }
+
+    .recommendation-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9999px;
+      background-color: #ede9fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+    }
+
+    .dark .recommendation-icon {
+      background-color: #4338ca;
+    }
+
+    .topic-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .topic-button {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      border: 1px solid #e5e7eb;
+      background-color: white;
+      transition: all 0.2s;
+    }
+
+    .dark .topic-button {
+      background-color: #1f2937;
+      border-color: #4b5563;
+    }
+
+    .topic-button.active {
+      background-color: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+    }
+
+    .dark .topic-button.active {
+      background-color: #6d28d9;
+      border-color: #6d28d9;
+    }
+
+    .topic-resources {
+      display: none;
+    }
+
+    .topic-resources.active {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .topic-resources.active {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .resource-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .dark .resource-item {
+      background-color: #1f2937;
+      border-color: #4b5563;
+    }
+
+    .resource-item:hover {
+      background-color: #f9fafb;
+    }
+
+    .dark .resource-item:hover {
+      background-color: #374151;
+    }
+
+    .resource-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9999px;
+      background-color: #ede9fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+    }
+
+    .dark .resource-icon {
+      background-color: #5b21b6;
+    }
+
+    .resource-type {
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-transform: capitalize;
+    }
+
+    .dark .resource-type {
+      color: #9ca3af;
+    }
+
+    /* Add these styles to your existing CSS */
+    .bot-content p {
+      margin-bottom: 0.75rem;
+    }
+
+    .bot-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bot-content ul,
+    .bot-content ol {
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+
+    .bot-content li {
+      margin-bottom: 0.25rem;
+    }
+
+    .bot-content code {
+      background-color: #f1f1f1;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+
+    .dark .bot-content code {
+      background-color: #2d3748;
+    }
+
+    .bot-content pre {
+      background-color: #f1f1f1;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    .dark .bot-content pre {
+      background-color: #2d3748;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">AI Tutoring Tool</div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="chat.html" class="nav-link">Chat</a>
+        <a href="video.html" class="nav-link">Video</a>
+      </nav>
+    </header>
+
+    <!-- Chat Container -->
+    <div class="card chat-container">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <div class="chat-title">
+          <div class="chat-avatar">AI</div>
+          <div>
+            <div class="font-medium">Gemini Flash AI Tutor</div>
+            <div class="text-xs text-gray-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="h-3 w-3 mr-1 text-yellow-400">
+                <path
+                  d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+                </path>
+                <path d="M5 3v4"></path>
+                <path d="M19 17v4"></path>
+                <path d="M3 5h4"></path>
+                <path d="M17 19h4"></path>
+              </svg>
+              Powered by Google
+            </div>
+          </div>
+        </div>
+        <div class="chat-actions">
+          <button id="theme-toggle-chat" class="chat-action-btn" title="Toggle theme">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="hidden dark:block h-5 w-5">
+              <circle cx="12" cy="12" r="5"></circle>
+              <path d="M12 1v2"></path>
+              <path d="M12 21v2"></path>
+              <path d="M4.22 4.22l1.42 1.42"></path>
+              <path d="M18.36 18.36l1.42 1.42"></path>
+              <path d="M1 12h2"></path>
+              <path d="M21 12h2"></path>
+              <path d="M4.22 19.78l1.42-1.42"></path>
+              <path d="M18.36 5.64l1.42-1.42"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="block dark:hidden h-5 w-5">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
+          <button id="clear-chat-btn" class="chat-action-btn" title="Clear chat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+          </button>
+          <button id="resources-toggle-btn" class="chat-action-btn" title="Learning resources">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Content -->
+      <div id="chat-content" class="chat-content">
+        <!-- Bot welcome message -->
+        <div class="bot-message">
+          <div class="message-bubble bot">
+            <div class="bot-header">
+              <span class="bot-icon">✨</span>
+              <span class="bot-name">Gemini Flash</span>
+            </div>
+            <div class="bot-content">
+              <p>Hello! I'm your AI tutor powered by Gemini Flash. How can I help you with your learning today?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resources Panel (Hidden by default) -->
+      <div id="resources-panel" class="resources-panel">
+        <!-- AI Recommendations -->
+        <div class="ai-recommendations">
+          <h3 class="recommendation-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="h-5 w-5 mr-2 text-purple-600">
+              <path
+                d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+              </path>
+              <path d="M5 3v4"></path>
+              <path d="M19 17v4"></path>
+              <path d="M3 5h4"></path>
+              <path d="M17 19h4"></path>
+            </svg>
+            AI Recommended Resources
+          </h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            Based on your recent questions, these resources might help you:
+          </p>
+          <div class="space-y-3">
+            <a href="https://www.khanacademy.org/math/algebra" target="_blank" rel="noopener noreferrer"
+              class="recommendation-item">
+              <div class="recommendation-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path d="M8.21 13.89 7 23l9-9-8.99-9L7.76 13.3"></path>
+                  <path d="M14.92 14.92 17 23l-2.08-8.08"></path>
+                  <path d="M4.73 4.73 12 12"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">Khan Academy: Algebra Fundamentals</div>
+                <div class="text-xs text-purple-600 dark:text-purple-400">Highly Relevant • Interactive Course</div>
+              </div>
+            </a>
+            <a href="https://www.youtube.com/playlist?list=PLmdFyQYShrjfPLdHQxuNWvh2ct666Na2" target="_blank"
+              rel="noopener noreferrer" class="recommendation-item">
+              <div class="recommendation-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path d="m22 8-6 4 6 4V8Z"></path>
+                  <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">Visual Algebra Explanations</div>
+                <div class="text-xs text-purple-600 dark:text-purple-400">Recommended • Video Series</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Topic Resources -->
+        <div>
+          <h3 class="text-lg font-medium mb-2">Learning Resources by Topic</h3>
+          <div class="topic-buttons">
+            <button class="topic-button active" data-topic="math">Math</button>
+            <button class="topic-button" data-topic="science">Science</button>
+            <button class="topic-button" data-topic="history">History</button>
+            <button class="topic-button" data-topic="english">English</button>
+            <button class="topic-button" data-topic="programming">Programming</button>
+            <button class="topic-button" data-topic="general">General</button>
+          </div>
+
+          <!-- Math Resources (default) -->
+          <div id="math-resources" class="topic-resources active">
+            <a href="https://www.khanacademy.org/math" target="_blank" rel="noopener noreferrer" class="resource-item">
+              <div class="resource-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path
+                    d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+                  </path>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">Khan Academy - Mathematics</div>
+                <div class="resource-type">Interactive</div>
+              </div>
+            </a>
+            <a href="https://www.desmos.com/calculator" target="_blank" rel="noopener noreferrer" class="resource-item">
+              <div class="resource-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">Desmos Graphing Calculator</div>
+                <div class="resource-type">Tool</div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Science Resources (hidden) -->
+          <div id="science-resources" class="topic-resources">
+            <a href="https://science.nasa.gov/" target="_blank" rel="noopener noreferrer" class="resource-item">
+              <div class="resource-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">NASA Science</div>
+                <div class="resource-type">Reference</div>
+              </div>
+            </a>
+            <a href="https://phet.colorado.edu/" target="_blank" rel="noopener noreferrer" class="resource-item">
+              <div class="resource-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-4 w-4 text-purple-600">
+                  <path
+                    d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+                  </path>
+                </svg>
+              </div>
+              <div>
+                <div class="font-medium">PhET Interactive Simulations</div>
+                <div class="resource-type">Interactive</div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Other topic resources would be added here -->
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="chat-input">
+        <form id="chat-form" class="chat-form">
+          <button type="button" id="attach-file-btn" class="chat-action-btn" title="Attach file">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path
+                d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48">
+              </path>
+            </svg>
+          </button>
+          <textarea id="message-input" class="chat-textarea" placeholder="Ask me anything about your studies..."
+            rows="1"></textarea>
+          <button type="submit" id="send-message-btn" class="chat-send-btn" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="m22 2-7 20-4-9-9-4Z"></path>
+              <path d="M22 2 11 13"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">Powered by Google Gemini Flash</p>
+  </div>
+
+  <script>
+    // Initialize chat functionality
+    document.addEventListener('DOMContentLoaded', function () {
+      const chatContent = document.getElementById('chat-content');
+      const messageInput = document.getElementById('message-input');
+      const chatForm = document.getElementById('chat-form');
+      const sendButton = document.getElementById('send-message-btn');
+      const resourcesToggleBtn = document.getElementById('resources-toggle-btn');
+      const resourcesPanel = document.getElementById('resources-panel');
+      const clearChatBtn = document.getElementById('clear-chat-btn');
+      const themeToggleChat = document.getElementById('theme-toggle-chat');
+      const topicButtons = document.querySelectorAll('.topic-button');
+
+      // Gemini API Key - Replace with your actual API key
+      const GEMINI_API_KEY = "AIzaSyAr-3cbGf4Iz_c9z1Mn5ax0bbbLYERmpOM"; // Important: In production, use environment variables
+      const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+      // Initialize Gemini API
+      async function callGeminiAPI(userMessage) {
+        try {
+          const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [
+                    {
+                      text: `You are Gemini Flash, an AI tutor helping students learn.
+                      Respond to this student question in a helpful, educational way: ${userMessage}`
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1024,
+              }
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text;
+          } else {
+            return "I apologize, but I'm having trouble generating a response right now. Please try again.";
+          }
+        } catch (error) {
+          console.error("Error calling Gemini API:", error);
+          return "I'm sorry, there was an error processing your request. Please try again later.";
+        }
+      }
+
+      // Enable/disable send button based on input
+      messageInput.addEventListener('input', function () {
+        sendButton.disabled = !messageInput.value.trim();
+
+        // Auto-resize textarea
+        messageInput.style.height = 'auto';
+        messageInput.style.height = (messageInput.scrollHeight) + 'px';
+      });
+
+      // Handle form submission
+      chatForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addUserMessage(message);
+
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendButton.disabled = true;
+
+        // Show loading indicator
+        const loadingIndicator = addLoadingIndicator();
+
+        try {
+          // Get response from Gemini API
+          const response = await callGeminiAPI(message);
+
+          // Remove loading indicator
+          chatContent.removeChild(loadingIndicator);
+
+          // Add AI response
+          addBotMessage(response);
+        } catch (error) {
+          // Remove loading indicator
+          chatContent.removeChild(loadingIndicator);
+
+          // Add error message
+          addBotMessage("I'm sorry, I encountered an error. Please try again later.");
+          console.error("Error:", error);
+        }
+      });
+
+      // Toggle resources panel
+      resourcesToggleBtn.addEventListener('click', function () {
+        resourcesPanel.classList.toggle('active');
+        resourcesToggleBtn.classList.toggle('active');
+      });
+
+      // Clear chat
+      clearChatBtn.addEventListener('click', function () {
+        // Keep only the first welcome message
+        while (chatContent.children.length > 1) {
+          chatContent.removeChild(chatContent.lastChild);
+        }
+      });
+
+      // Toggle theme
+      themeToggleChat.addEventListener('click', toggleTheme);
+
+      // Topic buttons
+      topicButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          // Update active button
+          topicButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          // Show corresponding resources
+          const topic = button.dataset.topic;
+          document.querySelectorAll('.topic-resources').forEach(resource => {
+            resource.classList.remove('active');
+          });
+          document.getElementById(`${topic}-resources`).classList.add('active');
+        });
+      });
+
+      // Helper functions
+      function addUserMessage(content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'user-message';
+        messageDiv.innerHTML = `
+          <div class="message-bubble user">
+            <p>${content}</p>
+          </div>
+        `;
+        chatContent.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      function addBotMessage(content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'bot-message';
+
+        // Process content for better formatting
+        const formattedContent = formatBotResponse(content);
+
+        messageDiv.innerHTML = `
+          <div class="message-bubble bot">
+            <div class="bot-header">
+              <span class="bot-icon">✨</span>
+              <span class="bot-name">Gemini Flash</span>
+            </div>
+            <div class="bot-content">${formattedContent}</div>
+          </div>
+        `;
+        chatContent.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      // Format AI responses for better display
+      function formatBotResponse(text) {
+        if (!text) return '';
+
+        // Handle paragraphs - convert single newlines to <br>, double newlines to paragraphs
+        let formatted = text
+          .replace(/\n\n+/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+
+        // Wrap in paragraph tags if not already
+        if (!formatted.startsWith('<p>')) {
+          formatted = `<p>${formatted}</p>`;
+        }
+
+        // Convert markdown-style lists to HTML lists
+        formatted = formatted.replace(/<p>(\s*[-*•]\s+.*?)<\/p>/g, '<ul><li>$1</li></ul>');
+        formatted = formatted.replace(/<br>\s*([-*•]\s+)/g, '</li><li>');
+
+        // Convert numbered lists
+        formatted = formatted.replace(/<p>(\s*\d+\.\s+.*?)<\/p>/g, '<ol><li>$1</li></ol>');
+        formatted = formatted.replace(/<br>\s*(\d+\.\s+)/g, '</li><li>');
+
+        // Clean up any additional formatting issues
+        formatted = formatted.replace(/<\/ul><br><ul>/g, '');
+        formatted = formatted.replace(/<\/ol><br><ol>/g, '');
+
+        return formatted;
+      }
+
+      function addLoadingIndicator() {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'bot-message';
+        loadingDiv.innerHTML = `
+          <div class="message-bubble bot">
+            <div class="loading-dots">
+              <span class="dot animate-bounce"></span>
+              <span class="dot animate-bounce-delay-1"></span>
+              <span class="dot animate-bounce-delay-2"></span>
+            </div>
+          </div>
+        `;
+        chatContent.appendChild(loadingDiv);
+        scrollToBottom();
+        return loadingDiv;
+      }
+
+      function scrollToBottom() {
+        chatContent.scrollTop = chatContent.scrollHeight;
+      }
+
+      // The generateResponse function can be kept as a fallback
+      function generateResponse(message) {
+        const lowerMessage = message.toLowerCase();
+
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+          return 'Hello! How can I help with your learning today?';
+        }
+
+        if (lowerMessage.includes('math') || lowerMessage.includes('algebra') || lowerMessage.includes('equation')) {
+          return `
+            <p>I'd be happy to help with math! Here are some key concepts to remember:</p>
+            <ul class="response-list">
+              <li>Always isolate the variable when solving equations</li>
+              <li>Remember the order of operations: PEMDAS (Parentheses, Exponents, Multiplication/Division, Addition/Subtraction)</li>
+              <li>Check your work by substituting your answer back into the original equation</li>
+            </ul>
+            <p class="mt-2">Would you like me to explain a specific math concept or help solve a problem?</p>
+          `;
+        }
+
+        if (lowerMessage.includes('science') || lowerMessage.includes('physics') || lowerMessage.includes('chemistry')) {
+          return `
+            <p>Science is fascinating! Here are some resources that might help:</p>
+            <ul class="response-list">
+              <li>Khan Academy has excellent science tutorials</li>
+              <li>PhET Interactive Simulations let you experiment virtually</li>
+              <li>NASA's website has great resources for astronomy and earth science</li>
+            </ul>
+            <p class="mt-2">What specific science topic are you studying?</p>
+          `;
+        }
+
+        return `
+          <p>Thank you for your question! I'm here to help with any subject you're studying.</p>
+          <p class="mt-2">To give you the best assistance, could you provide more details about what you're working on? For example:</p>
+          <ul class="response-list">
+            <li>The specific subject or topic</li>
+            <li>Any particular concepts you're finding challenging</li>
+            <li>The grade level or course you're taking</li>
+          </ul>
+        `;
+      }
+    });
+  </script>
+</body>
+
+</html>
